@@ -77,7 +77,7 @@
         th { background-color:#E2EFDA!important; font-weight: 600; border-top: 2px solid #333; border-bottom: 2px solid #333; text-transform: uppercase; font-size: 12px; }
         tr:nth-child(even) { background-color: #fafafa; }
         .total-row td { font-weight: bold; background: #f9f9f9; border-top: 2px solid #999; }
-        .qr-code { background-color: #000; width: 150px; padding: 10px; border-radius: 10px; }
+        .qr-code { background-color: #ffffffff; width: 150px; padding: 10px; border-radius: 10px;border:2px solid #000; }
         .qr-code img { height: 120px; display: block; margin: auto; }
         .signature img { height: 60px; }
         .notes { margin-top: 20px; font-size: 13px; }
@@ -215,11 +215,11 @@
 
 /* DomPDF background fix */
 .floor-row {
-    background: rgb(226,239,218) !important; /* #E2EFDA */
+    background: #e2efda6b !important; /* #E2EFDA */
 }
 
 .room-row {
-    background: rgb(238,244,255) !important; /* #EEF4FF */
+    background: #e2efda6b !important; /* #EEF4FF */
 }
 
 .total-row {
@@ -352,7 +352,6 @@ $grouped = $expenses
     {{-- Floor Header --}}
 <tr class="floor-row">
     <td colspan="7" style="
-        background:#E2EFDA;
         padding:8px;
         text-align:center;
         font-weight:700;
@@ -366,7 +365,7 @@ $grouped = $expenses
     @foreach($rooms as $room => $items)
 
         {{-- Room Header --}}
-        <tr style="background:#eef4ff;" class="room-row">
+        <tr  class="room-row">
             <td colspan="7" style="text-align:center;font-weight:700;text-transform:uppercase;padding:4px;border-top:1px solid #1a1414ff;border-bottom:1px solid #000000ff;">
                 {{ $room }}
             </td>
@@ -400,112 +399,132 @@ $grouped = $expenses
 
 @php
     $user = Auth::user();
-    // ensure the flag exists (false by default)
     $isWhatsApp = isset($is_whatsapp) && $is_whatsapp ? true : false;
-    // ensure total_expense exists and is numeric
     $totalExpenseValue = isset($total_expense) ? (float)$total_expense : 0;
 @endphp
 
 
+    {{-- GST Input --}}
+    <tr style="font-weight:bold;background:#e1ffe8;" class="total-row">
+        <td colspan="6">
+            GST 
+            @if ($user->role === 'admin')
+                <input
+                    type="number"
+                    id="gstRate"
+                    class="no-print"
+                    value="{{ $project->gst ?? 18 }}"
+                    step="0.01"
+                    min="0"
+                    style="width:80px;text-align:right;border:1px solid #ccc;border-radius:5px;padding:3px;">
+            @endif
+            <span id="gstRateText">({{ $project->gst ?? 18 }}%)</span>
+        </td>
+        <td style="text-align:right;" id="gstAmount">
+            ₹{{ number_format($totalExpenseValue * (($project->gst ?? 18) / 100), 2) }}
+        </td>
+    </tr>
 
-
-
-@if ($user && $user->role === 'admin')
-
-
-{{-- GST Input --}}
-<tr style="font-weight:bold;background:#e1ffe8;" class="total-row">
-    <td colspan="6">
-        GST 
-        @if(! $isWhatsApp && $user && optional($user)->role === 'admin')
-            {{-- Show Input only for admin and not in WhatsApp --}}
-            <input
-                type="number"
-                id="gstRate"
-                class="no-print"
-                value="18"
-                step="0.01"
-                min="0"
-                style="width:80px;text-align:right;border:1px solid #ccc;border-radius:5px;padding:3px;">
-        @endif
-
-        {{-- Always show percentage text for all users --}}
-        <span id="gstRateText">(18%)</span>
-    </td>
-    <td style="text-align:right;" id="gstAmount">₹{{ number_format($totalExpenseValue * 0.18, 2) }}</td>
-</tr>
-
-
-
-
-    {{-- Discount Row --}}
+    {{-- Discount Input --}}
     <tr style="font-weight:bold;background:#fff4e1;" class="total-row">
         <td colspan="6">
             Discount (₹)
-            @if(!$isWhatsApp)
+            @if ($user->role === 'admin')
                 <input
                     type="number"
                     id="discountAmount"
                     class="no-print"
-                    value="0"
+                    value="{{ $project->discount ?? 0 }}"
                     step="0.01"
                     min="0"
                     style="width:100px;text-align:right;border:1px solid #ccc;border-radius:5px;padding:3px;">
             @endif
         </td>
-        <td style="text-align:right;" id="discountDisplay">₹0.00</td>
+        <td style="text-align:right;" id="discountDisplay">
+            ₹{{ number_format($project->discount ?? 0, 2) }}
+        </td>
     </tr>
 
     {{-- Grand Total --}}
     <tr style="font-weight:bold;background:#f2fff5;" class="total-row">
         <td colspan="6">Grand Total (Including GST & Discount)</td>
-        <td style="text-align:right;" id="grandTotal">₹{{ number_format($totalExpenseValue * 1.18, 2) }}</td>
+        <td style="text-align:right;" id="grandTotal">
+            ₹{{ number_format(($totalExpenseValue + ($totalExpenseValue * (($project->gst ?? 18) / 100))) - ($project->discount ?? 0), 2) }}
+        </td>
     </tr>
 
-@else
-<tr>
-    <td style="font-size: 12px; color: #666; text-align:center;" colspan="7">
-        <strong>Note:</strong> This amount does not include GST & discounts.
-        &nbsp;&nbsp;&nbsp;&nbsp;
-        If you want to include GST in the invoice, please contact support.
-    </td>
-</tr>
-@endif
+    {{-- Script --}}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const totalExpense = {{ $totalExpenseValue }};
+            const projectId = {{ $project->id }};
+            const gstRateInput = document.getElementById('gstRate');
+            const gstRateText = document.getElementById('gstRateText');
+            const discountInput = document.getElementById('discountAmount');
+            const gstAmountEl = document.getElementById('gstAmount');
+            const discountDisplay = document.getElementById('discountDisplay');
+            const grandTotalEl = document.getElementById('grandTotal');
 
+            // ✅ Create reusable success toast
+            function showToast(message, color = '#28a745') {
+                const toast = document.createElement('div');
+                toast.textContent = message;
+                toast.style.position = 'fixed';
+                toast.style.bottom = '20px';
+                toast.style.right = '20px';
+                toast.style.background = color;
+                toast.style.color = '#fff';
+                toast.style.padding = '10px 15px';
+                toast.style.borderRadius = '8px';
+                toast.style.boxShadow = '0 2px 10px rgba(0,0,0,0.2)';
+                toast.style.fontSize = '14px';
+                toast.style.zIndex = '9999';
+                document.body.appendChild(toast);
+                setTimeout(() => toast.remove(), 2500);
+            }
 
+            function calculateTotal() {
+                const gstRate = parseFloat(gstRateInput.value) || 0;
+                const discount = parseFloat(discountInput.value) || 0;
 
+                const gstAmount = totalExpense * (gstRate / 100);
+                const grandTotal = (totalExpense + gstAmount) - discount;
 
+                gstAmountEl.textContent = '₹' + gstAmount.toFixed(2);
+                discountDisplay.textContent = '₹' + discount.toFixed(2);
+                grandTotalEl.textContent = '₹' + grandTotal.toFixed(2);
+                gstRateText.textContent = '(' + Math.round(gstRate) + '%)';
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // guaranteed numeric value passed from PHP
-    const totalExpense = {{ $totalExpenseValue }};
-    const gstRateInput = document.getElementById('gstRate');
-    const gstRateText = document.getElementById('gstRateText');
-    const discountInput = document.getElementById('discountAmount');
-    const gstAmountEl = document.getElementById('gstAmount');
-    const discountDisplay = document.getElementById('discountDisplay');
-    const grandTotalEl = document.getElementById('grandTotal');
+                // Save to DB via AJAX (Debounced)
+                clearTimeout(window.saveTimer);
+                window.saveTimer = setTimeout(() => saveGSTandDiscount(gstRate, discount), 700);
+            }
 
-    function calculateTotal() {
-        const gstRate = gstRateInput ? parseFloat(gstRateInput.value) || 0 : 18;
-        const discount = discountInput ? parseFloat(discountInput.value) || 0 : 0;
+            function saveGSTandDiscount(gst, discount) {
+                fetch(`/projects/${projectId}/update-gst-discount`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ gst, discount })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        showToast('✅ GST & Discount Saved Successfully');
+                    } else {
+                        showToast('❌ Failed to Save', '#dc3545');
+                    }
+                })
+                .catch(err => showToast('⚠️ Server Error: ' + err.message, '#ffc107'));
+            }
 
-        const gstAmount = totalExpense * (gstRate / 100);
-        const grandTotal = (totalExpense + gstAmount) - discount;
+            gstRateInput?.addEventListener('input', calculateTotal);
+            discountInput?.addEventListener('input', calculateTotal);
+        });
+    </script>
 
-        if (gstAmountEl) gstAmountEl.textContent = '₹' + gstAmount.toFixed(2);
-        if (discountDisplay) discountDisplay.textContent = '- ₹' + discount.toFixed(2);
-        if (grandTotalEl) grandTotalEl.textContent = '₹' + grandTotal.toFixed(2);
-        if (gstRateText) gstRateText.textContent = '(' + Math.round(gstRate) + '%)';
-    }
-
-    if (gstRateInput) gstRateInput.addEventListener('input', calculateTotal);
-    if (discountInput) discountInput.addEventListener('input', calculateTotal);
-
-    calculateTotal();
-});
-</script>
 
 
 
@@ -516,10 +535,22 @@ document.addEventListener('DOMContentLoaded', function() {
 
 </tbody>
 </table>
-    </div>
+</div>
+
+
+
 
     <div class="no-break" style="overflow-x: auto; margin-top: 10px;">
         <p class="section-title">PAYMENT DETAILS</p>
+
+
+@php
+    // Ensure safe numeric values
+    $gstRate = isset($project->gst) ? (float)$project->gst : 0;
+    $discountValue = isset($project->discount) ? (float)$project->discount : 0;
+    $totalWithGst = ($total_expense + ($total_expense * ($gstRate / 100))) - $discountValue;
+@endphp
+
         <table>
             <thead>
                 <tr class="floor-row">
@@ -535,7 +566,7 @@ document.addEventListener('DOMContentLoaded', function() {
     @foreach($payment_rows as $row)
     <tr>
         <td>{{ $row['date'] }}</td>
-        <td style="text-align: right;">₹{{ number_format($total_expense, 2) }}</td>
+        <td style="text-align: right;">₹{{ number_format($totalWithGst, 2) }}</td>
         <td style="text-align: right;">
             @if($loop->first)
                 -
@@ -544,7 +575,10 @@ document.addEventListener('DOMContentLoaded', function() {
             @endif
         </td>
         <td style="text-align: right;">₹{{ number_format($row['amount'], 2) }}</td>
-        <td style="text-align: right;">₹{{ number_format($row['remaining_after_payment'], 2) }}</td>
+        <td style="text-align: right;">
+    ₹{{ number_format($row['remaining_after_payment'] + ($total_expense * ($gstRate / 100)) - $discountValue, 2) }}
+</td>
+
         <td style="text-align: center;">{{ ucfirst($row['payment_mode']) }}</td>
     </tr>
     @endforeach
@@ -556,7 +590,7 @@ document.addEventListener('DOMContentLoaded', function() {
     </tr>
     <tr class="total-row">
         <td colspan="4">Yet to Receive (rounded value)</td>
-        <td colspan="2" style="text-align: right;">₹{{ number_format($yet_to_receive) }}</td>
+        <td colspan="2" style="text-align: right;">₹{{ number_format(($yet_to_receive + ($total_expense * ($gstRate / 100)) - $discountValue), 2) }}</td>
     </tr>
 </tfoot>
 
@@ -588,7 +622,7 @@ document.addEventListener('DOMContentLoaded', function() {
     <div class="payment-section d-flex justify-content-between flex-wrap">
         <div class="qr-sign" style="text-align: left; flex: 2; min-width: 250px;">
             <div class="qr-code" style="display: inline-block;">
-                <img src="{{ asset('images/QR.png') }}" alt="UPI QR Code">
+                <img src="{{ asset('images/QR2.png') }}" alt="UPI QR Code">
             </div>
 
             <div style="display: block; width:150px;">

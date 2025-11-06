@@ -203,5 +203,41 @@ public function showPayments(Request $request, $projectId)
 
 
 
+// update gst
+
+public function updateGstAndDiscount(Request $request, $id)
+{
+    try {
+        $project = \App\Models\Project::findOrFail($id);
+
+        // Only admin can update
+        if (auth()->user()->role !== 'admin') {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        // Validate input
+        $request->validate([
+            'gst' => 'numeric|min:0|max:100',
+            'discount' => 'numeric|min:0',
+        ]);
+
+        // Save values to DB
+        $project->gst = $request->gst;
+        $project->discount = $request->discount;
+        $project->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'GST and discount updated successfully',
+            'gst' => $project->gst,
+            'discount' => $project->discount,
+        ]);
+    } catch (\Exception $e) {
+        // Debug: log the exact error
+        \Log::error('GST/Discount update failed: '.$e->getMessage());
+        return response()->json(['error' => 'Server error: '.$e->getMessage()], 500);
+    }
+}
+
 
 }

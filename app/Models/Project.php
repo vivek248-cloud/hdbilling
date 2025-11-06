@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Project extends Model
 {
-    protected $fillable = ['user_id', 'name', 'budget', 'amount_paid', 'remaining_amount', 'status', 'date'];
+    protected $fillable = ['user_id', 'name', 'budget', 'amount_paid', 'remaining_amount', 'status', 'date' , 'gst', 'discount'];
 
     public function user()
     {

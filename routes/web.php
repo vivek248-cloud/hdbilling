@@ -88,12 +88,8 @@ Route::get('/projects/{project}/expenses', [ExpenseController::class, 'showProje
 
 
 
-use App\Helpers\InvoiceHelper;
 
-Route::post('/invoice/{paymentId}/save-values', function (Illuminate\Http\Request $request, $paymentId) {
-    $gst = $request->input('gst_percentage', 18);
-    $discount = $request->input('discount_amount', 0);
+Route::post('/projects/{project}/update-gst-discount', [ProjectController::class, 'updateGstAndDiscount'])
+    ->name('projects.updateGstDiscount')
+    ->middleware('auth');
 
-    InvoiceHelper::saveValues($paymentId, $gst, $discount);
-    return response()->json(['success' => true]);
-})->middleware('auth');
