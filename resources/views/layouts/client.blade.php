@@ -125,30 +125,64 @@
             color: #fff;
         }
 
+        /* Offcanvas Menu Styling */
+        .offcanvas {
+            background: #212529;
+            color: #ddd;
+            width: 280px !important;
+        }
+        .offcanvas-header {
+            border-bottom: 1px solid rgba(255,255,255,.1);
+        }
+        .offcanvas-title {
+            font-weight: 600;
+            color: #fff;
+        }
+        .offcanvas .nav-link {
+            color: #ddd !important;
+            padding: 0.75rem 1.5rem;
+            font-weight: 500;
+        }
+        .offcanvas .nav-link:hover,
+        .offcanvas .nav-link.active {
+            background: rgba(0, 208, 132, 0.15);
+            color: #00d084 !important;
+            padding-left: 2rem;
+        }
+        .offcanvas .nav-link i {
+            width: 20px;
+            text-align: center;
+            margin-right: 0.75rem;
+        }
+
+        body.dark-mode .offcanvas {
+            background: #000;
+        }
+
         @media (max-width: 576px) {
-            .custom-table {
-                font-size: 0.9rem;
-            }
-            .navbar-brand span {
-                font-size: 0.9rem;
-            }
+            .custom-table { font-size: 0.9rem; }
+            .navbar-brand span { font-size: 0.9rem; }
+            .offcanvas { width: 100% !important; }
         }
     </style>
 </head>
 <body>
+
+    <!-- ====================== NAVBAR ====================== -->
     <nav class="navbar navbar-expand-lg navbar-dark py-2">
         <div class="container">
             <!-- Logo + Brand -->
             <a class="navbar-brand d-flex align-items-center" href="{{ url('/') }}">
-                <img src="{{ asset('images/logo.PNG') }}" alt="HOME DEN Invoice Logo" class="me-2">
+                <img src="{{ asset('images/logo.png') }}" alt="HOME DEN Invoice Logo" class="me-2">
                 <span>HOME DEN INVOICE</span>
             </a>
 
-            <!-- Toggler -->
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <!-- Toggler (Opens Offcanvas) -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#leftMenu">
                 <span class="navbar-toggler-icon"></span>
             </button>
 
+            <!-- Desktop Navigation (Hidden on Mobile) -->
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     @auth
@@ -185,6 +219,63 @@
         </div>
     </nav>
 
+    <!-- ====================== OFFCANVAS MENU (FROM LEFT) ====================== -->
+    <div class="offcanvas offcanvas-start" tabindex="-1" id="leftMenu">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title">Menu</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
+        </div>
+        <div class="offcanvas-body">
+    <ul class="nav flex-column">
+
+        {{-- ==================== MENU ITEMS ==================== --}}
+        @auth
+            <li class="nav-item">
+                <a class="nav-link {{ request()->is('client/dashboard') ? 'active' : '' }}"
+                   href="{{ route('client.dashboard') }}">
+                    <i class="bi bi-speedometer2"></i> Dashboard
+                </a>
+            </li>
+            {{-- Add more menu items here if you want --}}
+        @endauth
+
+        <hr class="my-4 border-secondary opacity-50">
+
+        {{-- ==================== MOBILE ACTIONS ==================== --}}
+        <div class="d-lg-none px-3">
+
+            {{-- Dark Mode Toggle --}}
+            <div class="d-flex align-items-center justify-content-between mb-4">
+                <button id="darkModeToggleMobile"
+                        class="btn btn-sm btn-outline-light rounded-pill px-3">
+                    <i class="bi bi-moon-fill"></i>
+                </button>
+            </div>
+
+            {{-- Logout / Login --}}
+            @auth
+                <form id="client-logout-form" action="{{ route('client.logout') }}" method="POST" class="d-none">
+                    @csrf
+                </form>
+                <a href="#"
+                   onclick="event.preventDefault(); document.getElementById('client-logout-form').submit();"
+                   class="btn btn-sm btn-danger rounded-pill px-3">
+                    <i class="bi bi-box-arrow-right"></i>
+                    Logout ({{ Auth::user()->name }})
+                </a>
+            @else
+                <a href="{{ route('login') }}"
+                   class="btn btn-outline-light w-100 d-flex align-items-center justify-content-center gap-2">
+                    <i class="bi bi-box-arrow-in-right"></i>
+                    Login
+                </a>
+            @endauth
+        </div>
+    </ul>
+</div>
+    </div>
+
+    <!-- ====================== MAIN CONTENT ====================== -->
     <div class="container mt-4">
         @yield('content')
     </div>
@@ -194,23 +285,46 @@
 
     <!-- Dark Mode Script -->
     <script>
-        const toggleBtn = document.getElementById('darkModeToggle');
         const body = document.body;
+        const toggleDesktop = document.getElementById('darkModeToggle');
+        const toggleMobile = document.getElementById('darkModeToggleMobile');
 
-        // Restore dark mode from localStorage
-        if (localStorage.getItem('dark-mode') === 'enabled') {
-            body.classList.add('dark-mode');
-            toggleBtn.innerHTML = '<i class="bi bi-sun-fill"></i>';
-        }
-
-        toggleBtn?.addEventListener('click', () => {
-            body.classList.toggle('dark-mode');
-            if (body.classList.contains('dark-mode')) {
+        const applyDarkMode = (enable) => {
+            if (enable) {
+                body.classList.add('dark-mode');
+                [toggleDesktop, toggleMobile].forEach(btn => {
+                    if (btn) btn.innerHTML = '<i class="bi bi-sun-fill"></i>';
+                });
                 localStorage.setItem('dark-mode', 'enabled');
-                toggleBtn.innerHTML = '<i class="bi bi-sun-fill"></i>';
             } else {
+                body.classList.remove('dark-mode');
+                [toggleDesktop, toggleMobile].forEach(btn => {
+                    if (btn) btn.innerHTML = '<i class="bi bi-moon-fill"></i>';
+                });
                 localStorage.setItem('dark-mode', 'disabled');
-                toggleBtn.innerHTML = '<i class="bi bi-moon-fill"></i>';
+            }
+        };
+
+        // Init
+        const saved = localStorage.getItem('dark-mode');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        applyDarkMode(saved === 'enabled' || (!saved && prefersDark));
+
+        // Listeners
+        [toggleDesktop, toggleMobile].forEach(btn => {
+            btn?.addEventListener('click', () => {
+                applyDarkMode(!body.classList.contains('dark-mode'));
+            });
+        });
+
+        // Close offcanvas on outside click (mobile)
+        document.addEventListener('click', (e) => {
+            const canvas = document.getElementById('leftMenu');
+            if (window.innerWidth < 992 && canvas.classList.contains('show')) {
+                const isInside = canvas.contains(e.target) || e.target.closest('.navbar-toggler');
+                if (!isInside) {
+                    bootstrap.Offcanvas.getInstance(canvas)?.hide();
+                }
             }
         });
     </script>

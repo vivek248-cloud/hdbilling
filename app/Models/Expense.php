@@ -7,24 +7,36 @@ use Illuminate\Database\Eloquent\Model;
 
 class Expense extends Model
 {
-    protected $fillable = ['project_id', 'description', 'spec', 'area', 'unit', 'rate', 'length', 'width', 'date'];
-    protected $dates = ['date'];
+    use HasFactory;
 
+    protected $fillable = [
+        'project_id', 'description', 'spec', 'area', 'unit', 'rate', 
+        'length', 'width', 'date', 'floor_type_id', 'room_type_id'
+        ,'group','group2',
+    ];
+
+    protected $dates = ['date'];
 
     public function project()
     {
         return $this->belongsTo(Project::class);
     }
 
-        // Dynamically calculate amount
+    // ✅ Calculate total value dynamically
     public function getAmountAttribute()
     {
         return $this->area * $this->rate;
     }
 
-    public function expenses() {
-        return $this->hasMany(Expense::class);
+    // ✅ Floor Type Relation
+    public function floorType()
+    {
+        return $this->belongsTo(\App\Models\FloorType::class, 'group', 'id');
+    }
+
+    public function roomType()
+    {
+        return $this->belongsTo(\App\Models\RoomType::class, 'group2', 'id');
     }
 
 }
-

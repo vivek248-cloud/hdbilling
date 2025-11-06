@@ -22,6 +22,28 @@
         </div>
 
         <div class="mb-3">
+            <label for="group" class="form-label">Floor Type</label>
+            <select name="group" class="form-select">
+                @foreach($floorTypes as $type)
+                    <option value="{{ $type->id }}" {{ $expense->group == $type->id ? 'selected' : '' }}>
+                        {{ $type->name }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label for="group2" class="form-label">Room Type</label>
+            <select name="group2" class="form-select">
+                @foreach($roomTypes as $type)
+                    <option value="{{ $type->id }}" {{ $expense->group2 == $type->id ? 'selected' : '' }}>
+                        {{ $type->name }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+
+        <div class="mb-3">
             <label for="description" class="form-label">Description</label>
             <input type="text" name="description" class="form-control" value="{{ $expense->description }}" required>
         </div>
@@ -38,7 +60,7 @@
         </div>
 
                 <div class="mb-3">
-            <label for="area" class="form-label">Width</label>
+            <label for="area" class="form-label"> height or Width</label>
             <input type="number" step="0.01" name="width" id="width" class="form-control" placeholder="Enter width" required>
         </div>
 

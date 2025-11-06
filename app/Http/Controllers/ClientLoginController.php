@@ -35,19 +35,64 @@ class ClientLoginController extends Controller
     }
 
 
+// public function dashboard(Request $request)
+// {
+//     $user = auth()->user();
+
+//     // 🔐 Only clients can access this dashboard
+//     if ($user->role !== 'client') {
+//         abort(403, 'Unauthorized');
+//     }
+
+//     // ✅ Fetch projects with relations
+//     $projects = \App\Models\Project::with(['expenses', 'payments' => function ($query) use ($request) {
+
+//         // ✅ Apply optional payment filters
+//         if ($request->filled('payment_filter_type') && $request->filled('payment_filter_value')) {
+//             $type = $request->payment_filter_type;
+//             $value = $request->payment_filter_value;
+
+//             switch ($type) {
+//                 case 'date':
+//                     $query->whereDate('date', $value);
+//                     break;
+//                 case 'month':
+//                     $year = substr($value, 0, 4);
+//                     $month = substr($value, 5, 2);
+//                     $query->whereYear('date', $year)->whereMonth('date', $month);
+//                     break;
+//                 case 'year':
+//                     $query->whereYear('date', $value);
+//                     break;
+//             }
+//         }
+
+//         $query->orderBy('date', 'asc');
+//     }])
+//     ->where('user_id', $user->id)
+//     ->get();
+
+//     return view('client.dashboard', compact('user', 'projects'));
+// }
+
+
 public function dashboard(Request $request)
 {
     $user = auth()->user();
 
-    // 🔐 Only clients can access this dashboard
+    // 🛡️ Only clients
     if ($user->role !== 'client') {
         abort(403, 'Unauthorized');
     }
 
-    // ✅ Fetch projects with relations
-    $projects = \App\Models\Project::with(['expenses', 'payments' => function ($query) use ($request) {
+    /*
+    |--------------------------------------------------------------------------
+    | 🔍 Fetch Client's Projects with Expenses & Payments
+    |--------------------------------------------------------------------------
+    */
+    $projects = Project::with(['expenses', 'payments' => function ($query) use ($request) {
 
-        // ✅ Apply optional payment filters
+        // ✅ Optional payment filters (already existed)
         if ($request->filled('payment_filter_type') && $request->filled('payment_filter_value')) {
             $type = $request->payment_filter_type;
             $value = $request->payment_filter_value;
@@ -72,7 +117,38 @@ public function dashboard(Request $request)
     ->where('user_id', $user->id)
     ->get();
 
-    return view('client.dashboard', compact('user', 'projects'));
+    /*
+    |--------------------------------------------------------------------------
+    | 🧮 Optional Expense Filtering (new)
+    |--------------------------------------------------------------------------
+    */
+    $filterType = $request->get('filter_type');
+    $filterValue = $request->get('filter_value');
+
+    $expensesQuery = \App\Models\Expense::query()
+        ->whereHas('project', fn($q) => $q->where('user_id', $user->id));
+
+    if ($filterType && $filterValue) {
+        switch ($filterType) {
+            case 'date':
+                $expensesQuery->whereDate('date', $filterValue);
+                break;
+            case 'month':
+                $year = substr($filterValue, 0, 4);
+                $month = substr($filterValue, 5, 2);
+                $expensesQuery->whereYear('date', $year)->whereMonth('date', $month);
+                break;
+            case 'year':
+                $expensesQuery->whereYear('date', $filterValue);
+                break;
+        }
+    }
+
+    $expenses = $expensesQuery->with(['floorType', 'roomType'])->orderBy('date', 'desc')->get();
+
+    $totalExpense = $expenses->sum(fn($e) => $e->area * $e->rate);
+
+    return view('client.dashboard', compact('user', 'projects', 'expenses', 'totalExpense', 'filterType', 'filterValue'));
 }
 
 

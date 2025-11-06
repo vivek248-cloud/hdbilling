@@ -19,6 +19,44 @@
         </div>
 
         <div class="mb-3">
+            <label for="group" class="form-label">Floor Type</label>
+            <div class="d-flex gap-2">
+            <select name="group" class="form-select">
+                <option value="">-- Select Floor Type --</option>
+                @foreach($floorTypes as $type)
+                    <option value="{{ $type->id }}" {{ old('group', $expense->group ?? '') == $type->id ? 'selected' : '' }}>
+                        {{ $type->name }}
+                    </option>
+                @endforeach
+            </select>
+
+
+        <a href="{{ route('floor-types.index') }}" class="btn btn-outline-primary btn-sm">Manage</a>
+
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label for="group2" class="form-label">Room Type</label>
+            <div class="d-flex gap-2">
+            <select name="group2" class="form-select">
+                <option value="">-- Select Room Type --</option>
+                @foreach($roomTypes as $type)
+                    <option value="{{ $type->id }}" {{ old('group2', $expense->group2 ?? '') == $type->id ? 'selected' : '' }}>
+                        {{ $type->name }}
+                    </option>
+                @endforeach
+            </select>
+
+
+        <a href="{{ route('room-types.index') }}" class="btn btn-outline-primary btn-sm">Manage</a>
+
+
+            </div>
+        </div>
+
+
+        <div class="mb-3">
             <label for="description" class="form-label">Description</label>
             <input type="text" name="description" class="form-control" required>
         </div>
@@ -34,7 +72,7 @@
         </div>
 
         <div class="mb-3">
-            <label for="width" class="form-label">Width</label>
+            <label for="width" class="form-label">height or width </label>
             <input type="number" step="0.01" name="width" id="width" class="form-control" placeholder="Enter width" required>
         </div>
 

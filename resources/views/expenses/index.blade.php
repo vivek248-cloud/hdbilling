@@ -45,8 +45,10 @@
                         <tr>
                             <th scope="col" class="text-center">#</th>
                             <th scope="col">Project</th>
-                            <th scope="col">Description</th>
+                            <th scope="col">Floor Type</th>
+                            <th scope="col">Room Type</th>
                             <th scope="col" class="text-end">Entity</th>
+                            <th scope="col">Description</th>
                             <th scope="col" class="text-end">Amount</th>
                             <th scope="col" class="text-center">Date</th>
                             <th scope="col" class="text-center">Actions</th>
@@ -60,8 +62,10 @@
                                     <div class="fw-semibold">{{ $expense->project->name }}</div>
                                     <small class="text-muted">{{ $expense->project->user->name }}</small>
                                 </td>
-                                <td>{{ $expense->description }}</td>
+                                <td>{{ $expense->floorType->name ?? '-' }}</td>
+                                <td>{{ $expense->roomType->name ?? '-' }}</td>
                                 <td class="text-end">{{ $expense->spec ?? '-' }}</td>
+                                <td>{{ $expense->description }}</td>
                                 <td class="text-end text-success fw-semibold">₹{{ number_format($expense->amount) }}</td>
                                 <td class="text-center">{{ \Carbon\Carbon::parse($expense->date)->format('d-m-Y') }}</td>
                                 <td class="text-center">

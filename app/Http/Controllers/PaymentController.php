@@ -1,6 +1,8 @@
 <?php
 
 namespace App\Http\Controllers;
+use App\Helpers\InvoiceHelper;
+
 
 use App\Models\Payment;
 use App\Models\Project;
@@ -202,6 +204,20 @@ class PaymentController extends Controller
     | 🧾 Fetch all payments up to this one
     |--------------------------------------------------------------------------
     */
+
+
+    // $groupedExpenses = $project->expenses
+    // ->groupBy('group') 
+    // ->map(fn($items) => $items->groupBy('group2')); 
+
+    $floorOrder = \App\Models\FloorType::orderBy('id')->pluck('id', 'name');
+    $roomOrder = \App\Models\RoomType::orderBy('id')->pluck('id', 'name');
+
+    
+   
+
+
+
     $paymentsUpToNow = $project->payments()
         ->where('id', '<=', $payment->id)
         ->orderBy('id')
@@ -247,6 +263,7 @@ class PaymentController extends Controller
     | 🧾 Return view with all invoice data
     |--------------------------------------------------------------------------
     */
+    
     return view('payments.invoice', [
         'project' => $project,
         'user' => $projectOwner,
@@ -258,6 +275,8 @@ class PaymentController extends Controller
         'yet_to_receive' => $totalExpense - $cumulativePaid,
         'invoice_number' => $invoiceNumber,
         'invoice_date' => $now->format('d-m-Y'),
+        'floorOrder' => $floorOrder,
+        'roomOrder' => $roomOrder,
     ]);
 }
 
@@ -265,14 +284,23 @@ class PaymentController extends Controller
 
 //temp invoice for whatsapp link
 
+// public function temporaryInvoice($paymentId)
+// {
+//     $payment = \App\Models\Payment::findOrFail($paymentId);
+
+//     // Redirect to the real invoice blade page
+//     return redirect()->route('payments.invoice', $payment->id);
+// }
+
 public function temporaryInvoice($paymentId)
 {
     $payment = \App\Models\Payment::findOrFail($paymentId);
 
-    // Redirect to the real invoice blade page
-    return redirect()->route('payments.invoice', $payment->id);
+    return view('payments.invoice', [
+        'payment' => $payment,
+        'is_whatsapp' => true // 👈 Add this flag
+    ]);
 }
-
 
 
 

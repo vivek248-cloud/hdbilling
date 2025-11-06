@@ -5,6 +5,8 @@
     {{-- 🏠 Welcome Header --}}
     <h2 class="mb-4 text-center">Welcome, {{ Auth::user()->name }}</h2>
 
+
+    
     {{-- 💼 Project Summary Table (Desktop) --}}
     <div class="table-responsive d-none d-md-block mb-5">
         <table class="table table-hover align-middle custom-table">
@@ -86,15 +88,117 @@
         @endforeach
     </div>
 
-{{-- 🧭 Payment Filter Form --}}
-<div class="mb-4 d-flex gap-2 flex-wrap align-items-center">
-<form method="GET" action="{{ route('client.dashboard') }}" 
-      class="d-flex flex-wrap align-items-center gap-2 mb-3">
 
-    <div class="flex-grow-1" style="max-width: 160px;">
-        <select name="payment_filter_type" 
-                class="form-select form-select-sm w-100" 
-                id="filterType">
+<div class="container">
+
+    <h4 class="mb-4">Welcome, {{ $user->name }} 👋</h4>
+
+    {{-- 🔍 Expense Filter Section --}}
+<form method="GET" class="row g-2 mb-3">
+    <div class="col-md-3 col-6">
+        <select name="filter_type" class="form-select" id="expenseFilterType">
+            <option value="">Filter Type</option>
+            <option value="date" {{ $filterType === 'date' ? 'selected' : '' }}>By Date</option>
+            <option value="month" {{ $filterType === 'month' ? 'selected' : '' }}>By Month</option>
+            <option value="year" {{ $filterType === 'year' ? 'selected' : '' }}>By Year</option>
+        </select>
+    </div>
+
+    <div class="col-md-3 col-6" id="expenseFilterValueWrapper">
+        <input 
+            type="text" 
+            name="filter_value" 
+            id="expenseFilterValue" 
+            class="form-control"
+            placeholder="YYYY-MM-DD / YYYY-MM / YYYY"
+            value="{{ $filterValue }}"
+        >
+    </div>
+
+    <div class="col-md-2 col-6">
+        <button class="btn btn-primary w-100">
+            <i class="bi bi-filter"></i> Apply
+        </button>
+    </div>
+
+    <div class="col-md-2 col-6">
+        <a href="{{ route('client.dashboard') }}" class="btn btn-secondary w-100">
+            <i class="bi bi-arrow-clockwise"></i> Reset
+        </a>
+    </div>
+</form>
+
+
+<div class="card mb-4 shadow-sm">
+
+            <div class="card-body">
+
+
+            {{-- 📊 Expenses Table --}}
+            <div class="table-responsive">
+                <h5 class="mb-3">Expense Details</h5>
+                <table class="table table-bordered table-striped align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>#</th>
+                            <th>Date</th>
+                            <th>Floor Type</th>
+                            <th>Room Type</th>
+                            <th>Description</th>
+                            <th>Spec</th>
+                            <th>Length</th>
+                            <th>Width</th>
+                            <th>Area</th>
+                            <th>Unit</th>
+                            <th>Rate</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse ($expenses as $index => $expense)
+                            <tr>
+                                <td>{{ $index + 1 }}</td>
+                                <td>{{ \Carbon\Carbon::parse($expense->date)->format('d-m-Y') }}</td>
+                                <td>{{ $expense->floorType->name ?? '-' }}</td>
+                                <td>{{ $expense->roomType->name ?? '-' }}</td>
+                                <td>{{ $expense->description }}</td>
+                                <td>{{ $expense->spec ?? '-' }}</td>
+                                <td>{{ $expense->length }}</td>
+                                <td>{{ $expense->width }}</td>
+                                <td>{{ number_format($expense->area, 2) }}</td>
+                                <td>{{ $expense->unit }}</td>
+                                <td>₹{{ number_format($expense->rate, 2) }}</td>
+                                <td>₹{{ number_format($expense->area * $expense->rate, 2) }}</td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="12" class="text-center text-muted">No expenses found.</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+
+                    @if($expenses->count() > 0)
+                        <tfoot>
+                            <tr class="table-secondary fw-bold">
+                                <td colspan="11" class="text-end">Total</td>
+                                <td>₹{{ number_format($totalExpense, 2) }}</td>
+                            </tr>
+                        </tfoot>
+                    @endif
+                </table>
+            </div>
+        </div>
+</div>
+
+
+
+{{-- 🧭 Payment Filter Form --}}
+<div class="container my-4">
+<form method="GET" action="{{ route('client.dashboard') }}" class="row g-2 mb-3">
+
+    {{-- Filter Type --}}
+    <div class="col-md-3 col-6">
+        <select name="payment_filter_type" class="form-select" id="paymentFilterType">
             <option value="">Filter Type</option>
             <option value="date" {{ request('payment_filter_type') === 'date' ? 'selected' : '' }}>By Date</option>
             <option value="month" {{ request('payment_filter_type') === 'month' ? 'selected' : '' }}>By Month</option>
@@ -102,29 +206,35 @@
         </select>
     </div>
 
-    <div class="flex-grow-1" style="max-width: 200px;">
+    {{-- Filter Value --}}
+    <div class="col-md-3 col-6" id="paymentFilterValueWrapper">
         <input 
             type="text" 
             name="payment_filter_value" 
-            id="filterValue" 
-            class="form-control form-control-sm w-100"
+            id="paymentFilterValue" 
+            class="form-control"
             placeholder="YYYY-MM-DD / YYYY-MM / YYYY"
             value="{{ request('payment_filter_value') }}"
         >
     </div>
 
-    <div>
-        <button class="btn btn-primary btn-sm w-100" style="min-width: 100px;">
+    {{-- Apply Button --}}
+    <div class="col-md-2 col-6">
+        <button class="btn btn-primary w-100">
             <i class="bi bi-filter"></i> Apply
         </button>
     </div>
 
-    <div>
-        <a href="{{ route('client.dashboard') }}" class="btn btn-outline-secondary btn-sm w-100" style="min-width: 100px;">
+    {{-- Reset Button --}}
+    <div class="col-md-2 col-6">
+        <a href="{{ route('client.dashboard') }}" class="btn btn-secondary w-100">
             <i class="bi bi-arrow-clockwise"></i> Reset
         </a>
     </div>
 </form>
+
+
+
 
 
 
@@ -133,18 +243,12 @@
         {{-- 📊 Payment Details Section --}}
         @forelse($projects as $project)
         <div class="card mb-4 shadow-sm">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h5>{{ $project->name }}</h5>
-                <span class="badge bg-primary">Budget: ₹{{ number_format($project->budget, 2) }}</span>
-            </div>
             <div class="card-body">
-
-                <h6 class="mb-3">Payment Details</h6>
-
                 @if($project->payments->isNotEmpty())
                 <div class="table-responsive">
+                    <h5 class="mb-3">Expense Details</h5>
                     <table class="table table-bordered align-middle">
-                        <thead class="table-light">
+                        <thead class="table-dark">
                             <tr>
                                 <th>#</th>
                                 <th>Amount</th>
@@ -220,35 +324,63 @@
     }
 </style>
 
+
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const filterType = document.getElementById('filterType');
-    const filterValue = document.getElementById('filterValue');
+    function initDynamicFilter(typeId, wrapperId, inputName) {
+        const filterType = document.getElementById(typeId);
+        const wrapper = document.getElementById(wrapperId);
 
-    function updateInputType() {
-        const type = filterType.value;
+        function createInput(type, placeholder, value = '') {
+            const input = document.createElement('input');
+            input.name = inputName;
+            input.id = typeId + '_value';
+            input.value = value;
+            input.className = 'form-control';
+            input.placeholder = placeholder;
 
-        if (type === 'date') {
-            filterValue.type = 'date';
-            filterValue.placeholder = 'Select Date';
-        } else if (type === 'month') {
-            filterValue.type = 'month';
-            filterValue.placeholder = 'YYYY-MM';
-        } else if (type === 'year') {
-            filterValue.type = 'number';
-            filterValue.placeholder = 'YYYY';
-            filterValue.min = '1900';
-            filterValue.max = new Date().getFullYear();
-        } else {
-            filterValue.type = 'text';
-            filterValue.placeholder = 'YYYY-MM-DD / YYYY-MM / YYYY';
+            if (type === 'year') {
+                input.type = 'number';
+                input.min = '1900';
+                input.max = new Date().getFullYear();
+            } else {
+                input.type = type;
+            }
+
+            return input;
+        }
+
+        function updateInputType() {
+            const type = filterType.value;
+            const existingInput = wrapper.querySelector('input');
+            const currentValue = existingInput ? existingInput.value : '';
+
+            wrapper.innerHTML = '';
+
+            if (type === 'date') {
+                wrapper.appendChild(createInput('date', 'Select Date', currentValue));
+            } else if (type === 'month') {
+                wrapper.appendChild(createInput('month', 'Select Month', currentValue));
+            } else if (type === 'year') {
+                wrapper.appendChild(createInput('year', 'YYYY', currentValue));
+            } else {
+                wrapper.appendChild(createInput('text', 'YYYY-MM-DD / YYYY-MM / YYYY', currentValue));
+            }
+        }
+
+        if (filterType) {
+            filterType.addEventListener('change', updateInputType);
+            updateInputType();
         }
     }
 
-    filterType.addEventListener('change', updateInputType);
-    updateInputType();
+    // 🧩 Initialize both filters independently
+    initDynamicFilter('paymentFilterType', 'paymentFilterValueWrapper', 'payment_filter_value');
+    initDynamicFilter('expenseFilterType', 'expenseFilterValueWrapper', 'filter_value');
 });
 </script>
+
 
 
 

@@ -37,7 +37,10 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     Route::resource('expenses', ExpenseController::class);
     Route::resource('payments', PaymentController::class);
 
+    // Room & Floor Type Management ✅
 
+    Route::resource('floor-types', \App\Http\Controllers\FloorTypeController::class);
+    Route::resource('room-types', \App\Http\Controllers\RoomTypeController::class);
 
 
 
@@ -85,3 +88,12 @@ Route::get('/projects/{project}/expenses', [ExpenseController::class, 'showProje
 
 
 
+use App\Helpers\InvoiceHelper;
+
+Route::post('/invoice/{paymentId}/save-values', function (Illuminate\Http\Request $request, $paymentId) {
+    $gst = $request->input('gst_percentage', 18);
+    $discount = $request->input('discount_amount', 0);
+
+    InvoiceHelper::saveValues($paymentId, $gst, $discount);
+    return response()->json(['success' => true]);
+})->middleware('auth');

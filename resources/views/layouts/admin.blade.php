@@ -5,282 +5,380 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'HOME DEN Billing')</title>
     <link rel="icon" href="{{ asset('images/favicon.ico') }}" type="image/x-icon">
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    <!-- Bootstrap Icons -->
+    <!-- Bootstrap 5.3 + Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
 
-    <!-- Custom CSS -->
-<style>
-    html, body {
-        height: 100%;
-        margin: 0;
-        font-family: 'Poppins', sans-serif;
-        background: #f8f9fa;
-        display: flex;
-        flex-direction: column;
-        transition: background 0.3s ease, color 0.3s ease;
-        color: #212529;
-    }
+    <!-- Poppins Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    /* ✅ Dark Mode */
-    .dark-mode {
-        background: #121212;              /* deep dark */
-        color: #e4e4e4;                   /* soft white text */
-    }
+    <style>
+        :root {
+            --primary: #00d084;
+            --danger: #dc3545;
+            --danger-dark: #c82333;
+            --bg-light: #f8f9fa;
+            --bg-dark: #121212;
+            --surface-light: #ffffff;
+            --surface-dark: #1e1e1e;
+            --text-light: #212529;
+            --text-dark: #e4e4e4;
+        }
 
-    /* Optional: cool gradient for dark mode */
-    .dark-mode .home-left {
-        background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-    }
+        html, body {
+            height: 100%;
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            background: var(--bg-light);
+            color: var(--text-light);
+            display: flex;
+            flex-direction: column;
+            transition: background .3s, color .3s;
+        }
 
-    /* 🌓 Toggle Button Styling */
-    .dark-toggle-btn {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background: #ffffff;
-        border: none;
-        padding: 10px 14px;
-        border-radius: 50%;
-        cursor: pointer;
-        box-shadow: 0 0 10px rgba(0,0,0,0.15);
-        transition: background 0.3s ease;
-        z-index: 1000;
-    }
+        /* Dark Mode */
+        body.dark-mode {
+            background: var(--bg-dark);
+            color: var(--text-dark);
+        }
+        body.dark-mode .container { background: var(--surface-dark); color: var(--text-dark); }
+        body.dark-mode .navbar { background: linear-gradient(90deg, #000, #1a1a1a) !important; }
+        body.dark-mode .table th { background: var(--primary); }
+        body.dark-mode footer { background: linear-gradient(90deg, #000, #1a1a1a); color: var(--text-dark); }
 
-    .dark-toggle-btn i {
-        font-size: 20px;
-        color: #000;
-    }
+        /* Navbar */
+        .navbar {
+            background: linear-gradient(90deg, #212529, #343a40);
+            box-shadow: 0 2px 6px rgba(0,0,0,.3);
+        }
+        .navbar-brand img {
+            height: 40px;
+            width: auto;
+            border-radius: 8px;
+            transition: transform .3s;
+        }
+        .navbar-brand:hover img { transform: scale(1.1); }
+        .navbar-brand span {
+            font-weight: 600;
+            letter-spacing: 1px;
+            color: #f8f9fa;
+        }
+        .nav-link {
+            color: #f8f9fa !important;
+            font-weight: 500;
+            transition: color .2s, background .2s;
+        }
+        .nav-link:hover,
+        .nav-link.active {
+            color: var(--primary) !important;
+            border-bottom: 2px solid var(--primary);
+            border-radius: 8px;
+        }
 
-    .dark-mode .dark-toggle-btn {
-        background: #2c2c2c;
-    }
+        /* Logout Button */
+        .btn-logout {
+            background: var(--danger);
+            color: #fff !important;
+            border: none;
+            border-radius: 2rem;
+            padding: .4rem 1rem;
+            font-weight: 500;
+            transition: all .2s;
+            display: flex;
+            align-items: center;
+            gap: .4rem;
+        }
+        .btn-logout:hover {
+            background: var(--danger-dark);
+            transform: translateY(-1px);
+        }
 
-    .dark-mode .dark-toggle-btn i {
-        color: #fff;
-    }
+        /* Dark Mode Toggle */
+        #darkModeToggle, #darkModeToggleMobile {
+            width: 38px; height: 38px;
+            border-radius: 50%;
+            background: rgba(255,255,255,.15);
+            border: none;
+            color: #fff;
+            font-size: 1.1rem;
+            transition: background .2s;
+        }
+        #darkModeToggle:hover, #darkModeToggleMobile:hover { background: rgba(255,255,255,.25); }
 
+        /* Page layout */
+        main { flex: 1; padding-top: 80px; }
+        .container {
+            background: var(--surface-light);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,.08);
+        }
+        .table { border-radius: 10px; overflow: hidden; }
+        .table th { background: var(--primary); color: #fff; }
 
-    /* Navbar Styling */
-    .navbar {
-        background: linear-gradient(90deg, #212529, #343a40);
-        box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-        
-    }
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 1rem;
+            background: linear-gradient(90deg, #212529, #343a40);
+            color: #fff;
+            border-top: 6px double #fff;
+            font-size: .9rem;
+        }
 
-    .navbar-brand img {
-        height: 40px;
-        width: auto;
-        border-radius: 8px;
-        transition: transform 0.3s ease;
-    }
+        /* Off-canvas (RIGHT side on mobile) */
+        .offcanvas {
+            width: 280px !important;
+            background: #212529;
+        }
+        .offcanvas-header { border-bottom: 1px solid rgba(255,255,255,.1); }
+        .offcanvas-title { color: #fff; font-weight: 600; }
+        .offcanvas .nav-link {
+            color: #ddd !important;
+            padding: .75rem 1.5rem;
+            font-weight: 500;
+        }
+        .offcanvas .nav-link:hover,
+        .offcanvas .nav-link.active {
+            background: rgba(0,208,132,.15);
+            color: var(--primary) !important;
+            padding-left: 2rem;
+        }
+        body.dark-mode .offcanvas { background: #000; }
 
-    .navbar-brand span {
-        font-weight: 600;
-        letter-spacing: 1px;
-        color: #f8f9fa;
-    }
-
-    .navbar-brand:hover img {
-        transform: scale(1.1);
-    }
-
-    .nav-link {
-        color: #f8f9fa !important;
-        font-weight: 500;
-        transition: color 0.2s ease, background 0.2s ease;
-    }
-
-    .nav-link:hover {
-        color: #00d084 !important;
-        border-radius: 8px;
-        border-bottom: 2px solid #00d084;  /* optional underline for highlight */
-    }
-
-    .nav-link.active {
-        color: #00d084 !important;
-        font-weight: 500 !important;
-        border-radius: 8px;
-        border-bottom: 2px solid #00d084;  /* optional underline for highlight */
-    }
-
-
-    .btn-danger.btn-sm {
-        background-color: #dc3545;
-        border: none;
-        transition: all 0.3s;
-    }
-
-    .btn-danger.btn-sm:hover {
-        background-color: #c82333;
-    }
-
-    /* Page layout fix */
-    main {
-        flex: 1;
-        padding-top: 80px; /* navbar height spacing */
-    }
-
-    .container {
-        background: #fff;
-        border-radius: 10px;
-        padding: 20px;
-    }
-
-    h2, h3, h4 {
-        font-weight: 600;
-        color: #343a40;
-    }
-
-    .table {
-        border-radius: 10px;
-        overflow: hidden;
-    }
-
-    .table th {
-        background-color: #00d084;
-        color: #fff;
-    }
-
-    footer {
-        text-align: center;
-        padding: 15px;
-        color: #ffffffff;
-        background: linear-gradient(90deg, #212529, #343a40);
-        border-top: 8px double #ffffffff;
-    }
-</style>
-
+        @media (max-width: 576px) {
+            .offcanvas { width: 100% !important; }
+        }
+    </style>
 </head>
 <body>
 
-    <!-- Sticky Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
-        <div class="container-fluid">
-            <!-- Logo + Brand -->
-            <a class="navbar-brand d-flex align-items-center" href="{{ url('/') }}">
-                <img src="{{ asset('images/logo.PNG') }}" alt="HOME DEN Invoice Logo" class="me-2">
-                <span>HOME DEN INVOICE</span>
-            </a>
+<!-- ====================== NAVBAR ====================== -->
+<nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+    <div class="container-fluid">
 
-            <!-- Toggler -->
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
+        <!-- Brand (centered on mobile) -->
+        <a class="navbar-brand mx-auto mx-lg-0" href="{{ url('/') }}">
+            <img src="{{ asset('images/logo.png') }}" alt="Logo">
+            <span>HOME DEN INVOICE</span>
+        </a>
 
-            <!-- Menu -->
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    @auth
-                        @if(Auth::user()->role === 'admin')
-                            <li class="nav-item">
-                                <a class="nav-link {{ request()->is('admin/dashboard') ? 'active' : '' }}" href="{{ route('admin.dashboard') }}">
-                                    <i class="bi bi-speedometer2 me-2"></i> Dashboard
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link {{ Route::is('users.*') ? 'active' : '' }}" href="{{ route('users.index') }}">
-                                    <i class="bi bi-people me-2"></i> Users
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link {{ request()->is('admin/projects') ? 'active' : '' }}" href="{{ route('projects.index') }}">
-                                    <i class="bi bi-kanban me-2"></i> Projects
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link {{ request()->is('admin/expenses*') ? 'active' : '' }}" href="{{ route('expenses.index') }}">
-                                    <i class="bi bi-receipt me-2"></i> Cost
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link {{ request()->is('admin/payments*') ? 'active' : '' }}" href="{{ route('payments.index') }}">
-                                    <i class="bi bi-cash-stack me-2"></i> Payments
-                                </a>
-                            </li>
-                        @else
-                            <li class="nav-item">
-                                <a class="nav-link {{ request()->is('client/dashboard') ? 'active' : '' }}" href="{{ route('client.dashboard') }}">
-                                    <i class="bi bi-house-door me-2"></i> Dashboard
-                                </a>
-                            </li>
-                        @endif
-                    @endauth
-                </ul>
+        <!-- Hamburger (mobile) – opens RIGHT off-canvas -->
+        <button class="navbar-toggler d-lg-none ms-auto" type="button" data-bs-toggle="offcanvas" data-bs-target="#rightMenu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
 
-                <!-- Right Section -->
-                <ul class="navbar-nav ms-auto align-items-center">
-                    @guest
+        <!-- Desktop: Left Menu + Right Actions -->
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <!-- LEFT: Menu Items -->
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0 px-5">
+                @auth
+                    @if(Auth::user()->role === 'admin')
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ route('login') }}">
-                                <i class="bi bi-box-arrow-in-right"></i> Login
+                            <a class="nav-link {{ request()->is('admin/dashboard') ? 'active' : '' }}"
+                               href="{{ route('admin.dashboard') }}">
+                                <i class="bi bi-speedometer2 me-2"></i> Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ Route::is('users.*') ? 'active' : '' }}"
+                               href="{{ route('users.index') }}">
+                                <i class="bi bi-people me-2"></i> Users
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->is('admin/projects') ? 'active' : '' }}"
+                               href="{{ route('projects.index') }}">
+                                <i class="bi bi-kanban me-2"></i> Projects
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->is('admin/expenses*') ? 'active' : '' }}"
+                               href="{{ route('expenses.index') }}">
+                                <i class="bi bi-receipt me-2"></i> Cost
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->is('admin/payments*') ? 'active' : '' }}"
+                               href="{{ route('payments.index') }}">
+                                <i class="bi bi-cash-stack me-2"></i> Payments
                             </a>
                         </li>
                     @else
-                        <!-- 🟥 Logout -->
-                        <li class="nav-item me-2">
-                            <form method="POST" action="{{ route('logout') }}">
-                                @csrf
-                                <button type="submit" class="btn btn-danger btn-sm">
-                                    <i class="bi bi-box-arrow-right"></i> Logout ({{ Auth::user()->name }})
-                                </button>
-                            </form>
-                        </li>
-
-                        <!-- 🌗 Dark Mode Toggle -->
-                         &nbsp;
                         <li class="nav-item">
-                            <button id="darkModeToggle" class="btn btn-outline-light btn-sm rounded-circle" title="Toggle Dark Mode">
-                                <i class="bi bi-moon-fill"></i>
-                            </button>
+                            <a class="nav-link {{ request()->is('client/dashboard') ? 'active' : '' }}"
+                               href="{{ route('client.dashboard') }}">
+                                <i class="bi bi-house-door me-2"></i> Dashboard
+                            </a>
                         </li>
-                    @endguest
-                </ul>
+                    @endif
+                @endauth
+            </ul>
 
-            </div>
+            <!-- RIGHT: Auth Actions -->
+            <ul class="navbar-nav ms-auto align-items-center gap-2">
+                @guest
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('login') }}">
+                            <i class="bi bi-box-arrow-in-right"></i> Login
+                        </a>
+                    </li>
+                @else
+                    <li class="nav-item">
+                        <form method="POST" action="{{ route('logout') }}" class="d-inline">
+                            @csrf
+                            <button type="submit" class="btn btn-logout">
+                                <i class="bi bi-box-arrow-right"></i>
+                                Logout ({{ Auth::user()->name }})
+                            </button>
+                        </form>
+                    </li>
+
+                    <li class="nav-item">
+                        <button id="darkModeToggle" class="btn" title="Toggle Dark Mode">
+                            <i class="bi bi-moon-fill"></i>
+                        </button>
+                    </li>
+                @endguest
+            </ul>
         </div>
-    </nav>
+    </div>
+</nav>
 
+<!-- ====================== OFF-CANVAS (RIGHT SIDE - MOBILE) ====================== -->
+<div class="offcanvas offcanvas-end" tabindex="-1" id="rightMenu">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title">Menu</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
+    </div>
+    <div class="offcanvas-body">
+        <ul class="nav flex-column">
+            @auth
+                @if(Auth::user()->role === 'admin')
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->is('admin/dashboard') ? 'active' : '' }}"
+                           href="{{ route('admin.dashboard') }}">
+                            <i class="bi bi-speedometer2"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ Route::is('users.*') ? 'active' : '' }}"
+                           href="{{ route('users.index') }}">
+                            <i class="bi bi-people"></i> Users
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->is('admin/projects') ? 'active' : '' }}"
+                           href="{{ route('projects.index') }}">
+                            <i class="bi bi-kanban"></i> Projects
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->is('admin/expenses*') ? 'active' : '' }}"
+                           href="{{ route('expenses.index') }}">
+                            <i class="bi bi-receipt"></i> Cost
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->is('admin/payments*') ? 'active' : '' }}"
+                           href="{{ route('payments.index') }}">
+                            <i class="bi bi-cash-stack"></i> Payments
+                        </a>
+                    </li>
+                @else
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->is('client/dashboard') ? 'active' : '' }}"
+                           href="{{ route('client.dashboard') }}">
+                            <i class="bi bi-house-door"></i> Dashboard
+                        </a>
+                    </li>
+                @endif
+            @endauth
+
+            <hr class="my-4 border-secondary">
+
+            <div class="px-3">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <button id="darkModeToggleMobile" class="btn btn-sm btn-outline-light rounded-pill w-100">
+                        <i class="bi bi-moon-fill"></i>
+                    </button>
+                </div>
+
+                @guest
+                    <a href="{{ route('login') }}" class="btn btn-outline-light w-100">
+                        <i class="bi bi-box-arrow-in-right"></i> Login
+                    </a>
+                @else
+                    <form method="POST" action="{{ route('logout') }}" class="d-inline w-100" style="text-align: center;">
+                        @csrf
+                        <button type="submit" class="btn btn-logout w-100 text-center">
+                            <i class="bi bi-box-arrow-right"></i>
+                            Logout ({{ Auth::user()->name }})
+                        </button>
+                    </form>
+                @endguest
+            </div>
+        </ul>
+    </div>
+</div>
+
+<!-- ====================== MAIN CONTENT ====================== -->
 <main>
     <div class="container">
         @yield('content')
     </div>
 </main>
 
-    <footer>
-        © {{ date('Y') }} Home Den Billing. All rights reserved.
-    </footer>
+<!-- ====================== FOOTER ====================== -->
+<footer>
+    © {{ date('Y') }} Home Den Billing. All rights reserved.
+</footer>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<!-- ====================== SCRIPTS ====================== -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
-
-    <script>
-    const toggleBtn = document.getElementById('darkModeToggle');
+<script>
     const body = document.body;
+    const toggleDesktop = document.getElementById('darkModeToggle');
+    const toggleMobile = document.getElementById('darkModeToggleMobile');
 
-    // Check if dark mode was previously enabled
-    if (localStorage.getItem('dark-mode') === 'enabled') {
-        body.classList.add('dark-mode');
-        toggleBtn.innerHTML = '<i class="bi bi-sun-fill"></i>';
-    }
-
-    toggleBtn.addEventListener('click', () => {
-        body.classList.toggle('dark-mode');
-
-        // Switch icon
-        if (body.classList.contains('dark-mode')) {
-            toggleBtn.innerHTML = '<i class="bi bi-sun-fill"></i>';
+    const applyDarkMode = (enable) => {
+        if (enable) {
+            body.classList.add('dark-mode');
+            [toggleDesktop, toggleMobile].forEach(btn => {
+                if (btn) btn.innerHTML = '<i class="bi bi-sun-fill"></i>';
+            });
             localStorage.setItem('dark-mode', 'enabled');
         } else {
-            toggleBtn.innerHTML = '<i class="bi bi-moon-fill"></i>';
+            body.classList.remove('dark-mode');
+            [toggleDesktop, toggleMobile].forEach(btn => {
+                if (btn) btn.innerHTML = '<i class="bi bi-moon-fill"></i>';
+            });
             localStorage.setItem('dark-mode', 'disabled');
+        }
+    };
+
+    // Init
+    const saved = localStorage.getItem('dark-mode');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    applyDarkMode(saved === 'enabled' || (!saved && prefersDark));
+
+    // Listeners
+    [toggleDesktop, toggleMobile].forEach(btn => {
+        btn?.addEventListener('click', () => {
+            applyDarkMode(!body.classList.contains('dark-mode'));
+        });
+    });
+
+    // Close offcanvas on outside click
+    document.addEventListener('click', e => {
+        const canvas = document.getElementById('rightMenu');
+        if (window.innerWidth < 992 && canvas.classList.contains('show')) {
+            const inside = canvas.contains(e.target) || e.target.closest('.navbar-toggler');
+            if (!inside) bootstrap.Offcanvas.getInstance(canvas)?.hide();
         }
     });
 </script>
-
 </body>
 </html>

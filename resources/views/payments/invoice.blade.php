@@ -25,7 +25,7 @@
             font-size: 14px;
         }
 
-        h1, h2, h3, h4 {
+        h1 {
             font-family: 'Playfair Display', serif;
             color: #000;
             margin-bottom: 0.5rem;
@@ -70,11 +70,11 @@
         .top-section h1 { font-size: 48px; font-weight: 700; margin-bottom: 10px; }
         .top-section p { font-size: 13px; margin: 2px 0; }
         .invoice-meta { float: right; text-align: right; margin-top: -100px; }
-        .invoice-meta h1 { font-family: 'Playfair Display', serif; font-size: 50px; color: #444; }
-        .section-title {font-family: 'Playfair Display', serif; font-weight: bold; font-size: 15px; border-bottom: 1px solid #ccc; padding-bottom: 5px; margin-top: 10px; page-break-after: avoid; page-break-inside: avoid; }
+        .invoice-meta h1 { font-family: 'Lato', sans-serif; font-size: 50px; color: #444; }
+        .section-title {font-family: 'Lato', sans-serif; font-weight: bold; font-size: 15px; border-bottom: 1px solid #ccc; padding-bottom: 5px; margin-top: 10px; page-break-after: avoid; page-break-inside: avoid; }
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         th, td { padding: 10px 8px; border-bottom: 1px solid #e0e0e0; font-size: 13px; }
-        th { background-color:#E2EFDA; font-weight: 600; border-top: 2px solid #333; border-bottom: 2px solid #333; text-transform: uppercase; font-size: 12px; }
+        th { background-color:#E2EFDA!important; font-weight: 600; border-top: 2px solid #333; border-bottom: 2px solid #333; text-transform: uppercase; font-size: 12px; }
         tr:nth-child(even) { background-color: #fafafa; }
         .total-row td { font-weight: bold; background: #f9f9f9; border-top: 2px solid #999; }
         .qr-code { background-color: #000; width: 150px; padding: 10px; border-radius: 10px; }
@@ -200,6 +200,60 @@
     }
 }
 
+/* Force background colors in print PDF */
+@media print {
+    * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    table, tr, td, th {
+        background-color: inherit !important;
+    }
+}
+
+
+/* DomPDF background fix */
+.floor-row {
+    background: rgb(226,239,218) !important; /* #E2EFDA */
+}
+
+.room-row {
+    background: rgb(238,244,255) !important; /* #EEF4FF */
+}
+
+.total-row {
+    background: rgb(225,255,232) !important; /* #E1FFE8 */
+}
+
+table, th, td {
+    border: 1px solid #000;
+    border-collapse: collapse;
+}
+
+td, th {
+    padding: 6px;
+}
+
+.no-print2 {
+    display: inline;
+}
+
+.print-only {
+    display: none;
+}
+
+@media print {
+    .no-print {
+        display: none !important;
+    }
+    .print-only {
+        display: inline !important;
+    }
+}
+
+
+
 
 
     </style>
@@ -232,7 +286,7 @@
     </svg>
 
         <div class="brand-header d-flex align-items-center justify-content-center" style="margin-top: -30px;">
-            <img src="{{ asset('images/logo.PNG') }}" alt="Company Logo" class="brand-logo">
+            <img src="{{ asset('images/logo.png') }}" alt="Company Logo" class="brand-logo">
             
             <div class="brand-text ms-2 d-flex flex-column align-items-start">
                 <h5 class="head-text mb-0" style="color: #2ba58b;">
@@ -254,52 +308,221 @@
 
 
         <div class="invoice-meta">
-            <p><strong style="font-family: 'Playfair Display', serif;">Invoice No :</strong> {{ $invoice_number }}</p>
-            <p><strong style="font-family: 'Playfair Display', serif;">Date :</strong> {{ $invoice_date }}</p>
+            <p><strong style="font-family: 'Lato', sans-serif">INVOICE NO :</strong> {{ $invoice_number }}</p>
+            <p><strong style="font-family: 'Lato', sans-serif">DATE :</strong> {{ $invoice_date }}</p>
         </div>
 
     </div>
 
     <p class="section-title" style="text-align: right; margin-top:20px;">CLIENT INFORMATION</p>
-    <p style="text-align: right;font-family: 'Playfair Display', serif;"><strong>NAME :</strong> <strong>{{ strtoupper($user->name) }}</strong></p>
-    <p style="text-align: right;"><strong style="font-family: 'Playfair Display', serif;">MOBILE :</strong> <strong>{{ strtoupper($user->mobile) }}</strong></p>
+    <p style="text-align: right;font-family: 'Lato', sans-serif"><strong>NAME :</strong> <strong>{{ strtoupper($user->name) }}</strong></p>
+    <p style="text-align: right;"><strong style="font-family: 'Lato', sans-serif">MOBILE :</strong> <strong>{{ strtoupper($user->mobile) }}</strong></p>
     <p class="section-title">PROJECT SUMMARY</p>
     <div style="overflow-x: auto;">
         <table>
             <thead>
-                <tr>
-                    <th>Description</th>
+                <tr style="text-align: center;" class="floor-row">
+                    <th>#</th>
                     <th>Entity</th>
+                    <th>Specification</th>
                     <th>Area</th>
                     <th>Unit</th>
                     <th>Rate/Unit</th>
                     <th>Total</th>
                 </tr>
             </thead>
-            <tbody>
-                @foreach($expenses as $expense)
-                <tr>
-                    <td>{{ ucwords($expense->description) }}</td>
-                    <td>{{ ucwords($expense->spec ?? '-' )}}</td>
-                    <td>{{ ucwords($expense->area) }}</td>
-                    <td>{{ ucwords($expense->unit) }}</td>
-                    <td>₹{{ ucwords(number_format($expense->rate, 2)) }}</td>
-                    <td>₹{{ ucwords(number_format($expense->amount, 2)) }}</td>
-                </tr>
-                @endforeach
-                <tr class="total-row">
-                    <td colspan="5">Total Amount</td>
-                    <td>₹{{ number_format($total_expense, 2) }}</td>
-                </tr>
-            </tbody>
-        </table>
+<tbody>
+
+@php
+$row = 1;
+
+// Group by Floor → then Room
+$grouped = $expenses
+    ->whereNotNull('floorType')
+    ->groupBy(fn($e) => $e->floorType->name)
+    ->map(fn($items) => 
+        $items->groupBy(fn($e) => $e->roomType->name ?? 'Room')
+    );
+@endphp
+
+
+
+@foreach($grouped as $floor => $rooms)
+
+    {{-- Floor Header --}}
+<tr class="floor-row">
+    <td colspan="7" style="
+        background:#E2EFDA;
+        padding:8px;
+        text-align:center;
+        font-weight:700;
+        text-transform:uppercase;">
+        {{ $floor }}
+    </td>
+</tr>
+
+
+    {{-- Loop Rooms inside this Floor --}}
+    @foreach($rooms as $room => $items)
+
+        {{-- Room Header --}}
+        <tr style="background:#eef4ff;" class="room-row">
+            <td colspan="7" style="text-align:center;font-weight:700;text-transform:uppercase;padding:4px;border-top:1px solid #1a1414ff;border-bottom:1px solid #000000ff;">
+                {{ $room }}
+            </td>
+        </tr>
+
+        {{-- Items inside this room --}}
+        @foreach($items as $expense)
+        <tr>
+            <td style="text-align:center; width:40px;">{{ $row++ }}</td>
+            <td style="font-weight:bold;text-align:center;">
+                {{ $expense->spec }}
+            </td>
+            <td style="text-align:center;">{{ $expense->description }}</td>
+            <td style="text-align:center;">{{ number_format($expense->area,2) }}</td>
+            <td style="text-align:center;">{{ $expense->unit }}</td>
+            <td style="text-align:center;">₹{{ number_format($expense->rate,2) }}</td>
+            <td style="text-align:right;">₹{{ number_format($expense->amount,2) }}</td>
+        </tr>
+        @endforeach
+
+        
+    @endforeach
+
+@endforeach
+
+{{-- TOTAL --}}
+<tr style="font-weight:bold;background:#e1ffe8;" class="total-row">
+    <td colspan="6">Total Amount</td>
+    <td style="text-align:right;">₹{{ number_format($total_expense, 2) }}</td>
+</tr>
+
+@php
+    $user = Auth::user();
+    // ensure the flag exists (false by default)
+    $isWhatsApp = isset($is_whatsapp) && $is_whatsapp ? true : false;
+    // ensure total_expense exists and is numeric
+    $totalExpenseValue = isset($total_expense) ? (float)$total_expense : 0;
+@endphp
+
+
+
+
+
+@if ($user && $user->role === 'admin')
+
+
+{{-- GST Input --}}
+<tr style="font-weight:bold;background:#e1ffe8;" class="total-row">
+    <td colspan="6">
+        GST 
+        @if(! $isWhatsApp && $user && optional($user)->role === 'admin')
+            {{-- Show Input only for admin and not in WhatsApp --}}
+            <input
+                type="number"
+                id="gstRate"
+                class="no-print"
+                value="18"
+                step="0.01"
+                min="0"
+                style="width:80px;text-align:right;border:1px solid #ccc;border-radius:5px;padding:3px;">
+        @endif
+
+        {{-- Always show percentage text for all users --}}
+        <span id="gstRateText">(18%)</span>
+    </td>
+    <td style="text-align:right;" id="gstAmount">₹{{ number_format($totalExpenseValue * 0.18, 2) }}</td>
+</tr>
+
+
+
+
+    {{-- Discount Row --}}
+    <tr style="font-weight:bold;background:#fff4e1;" class="total-row">
+        <td colspan="6">
+            Discount (₹)
+            @if(!$isWhatsApp)
+                <input
+                    type="number"
+                    id="discountAmount"
+                    class="no-print"
+                    value="0"
+                    step="0.01"
+                    min="0"
+                    style="width:100px;text-align:right;border:1px solid #ccc;border-radius:5px;padding:3px;">
+            @endif
+        </td>
+        <td style="text-align:right;" id="discountDisplay">₹0.00</td>
+    </tr>
+
+    {{-- Grand Total --}}
+    <tr style="font-weight:bold;background:#f2fff5;" class="total-row">
+        <td colspan="6">Grand Total (Including GST & Discount)</td>
+        <td style="text-align:right;" id="grandTotal">₹{{ number_format($totalExpenseValue * 1.18, 2) }}</td>
+    </tr>
+
+@else
+<tr>
+    <td style="font-size: 12px; color: #666; text-align:center;" colspan="7">
+        <strong>Note:</strong> This amount does not include GST & discounts.
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        If you want to include GST in the invoice, please contact support.
+    </td>
+</tr>
+@endif
+
+
+
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // guaranteed numeric value passed from PHP
+    const totalExpense = {{ $totalExpenseValue }};
+    const gstRateInput = document.getElementById('gstRate');
+    const gstRateText = document.getElementById('gstRateText');
+    const discountInput = document.getElementById('discountAmount');
+    const gstAmountEl = document.getElementById('gstAmount');
+    const discountDisplay = document.getElementById('discountDisplay');
+    const grandTotalEl = document.getElementById('grandTotal');
+
+    function calculateTotal() {
+        const gstRate = gstRateInput ? parseFloat(gstRateInput.value) || 0 : 18;
+        const discount = discountInput ? parseFloat(discountInput.value) || 0 : 0;
+
+        const gstAmount = totalExpense * (gstRate / 100);
+        const grandTotal = (totalExpense + gstAmount) - discount;
+
+        if (gstAmountEl) gstAmountEl.textContent = '₹' + gstAmount.toFixed(2);
+        if (discountDisplay) discountDisplay.textContent = '- ₹' + discount.toFixed(2);
+        if (grandTotalEl) grandTotalEl.textContent = '₹' + grandTotal.toFixed(2);
+        if (gstRateText) gstRateText.textContent = '(' + Math.round(gstRate) + '%)';
+    }
+
+    if (gstRateInput) gstRateInput.addEventListener('input', calculateTotal);
+    if (discountInput) discountInput.addEventListener('input', calculateTotal);
+
+    calculateTotal();
+});
+</script>
+
+
+
+
+
+
+
+
+</tbody>
+</table>
     </div>
 
     <div class="no-break" style="overflow-x: auto; margin-top: 10px;">
         <p class="section-title">PAYMENT DETAILS</p>
         <table>
             <thead>
-                <tr>
+                <tr class="floor-row">
                     <th>Date</th>
                     <th>Total Amount</th>
                     <th>Previously Received</th>
@@ -312,17 +535,17 @@
     @foreach($payment_rows as $row)
     <tr>
         <td>{{ $row['date'] }}</td>
-        <td>₹{{ number_format($total_expense, 2) }}</td>
-        <td>
+        <td style="text-align: right;">₹{{ number_format($total_expense, 2) }}</td>
+        <td style="text-align: right;">
             @if($loop->first)
                 -
             @else
                 ₹{{ number_format($row['previous_payment'], 2) }}
             @endif
         </td>
-        <td>₹{{ number_format($row['amount'], 2) }}</td>
-        <td>₹{{ number_format($row['remaining_after_payment'], 2) }}</td>
-        <td>{{ ucfirst($row['payment_mode']) }}</td>
+        <td style="text-align: right;">₹{{ number_format($row['amount'], 2) }}</td>
+        <td style="text-align: right;">₹{{ number_format($row['remaining_after_payment'], 2) }}</td>
+        <td style="text-align: center;">{{ ucfirst($row['payment_mode']) }}</td>
     </tr>
     @endforeach
 </tbody>
@@ -343,7 +566,7 @@
 
     @if(count($expenses))
     <div class="notes">
-        <strong style="font-family: 'Playfair Display', serif;">NOTES:</strong>
+        <strong style="font-family: 'Lato', sans-serif">NOTES:</strong>
         <ol>
             @foreach($expenses as $expense)
                 @if($expense->specs)
@@ -358,20 +581,25 @@
     <!-- 📝 Thank You Greeting Section -->
     <div class="thank-you text-center mt-4">
         <h3 class="thank-heading">✨ Thank You for Your Business ✨</h3>
-        <p style="font-family: 'Playfair Display', serif; font-weight:600;">We truly appreciate your trust in<br><span style="font-weight: 800;font-family: 'Playfair Display', serif; font-size:0.8rem;"> HOME DEN INTERIORS.</span></p>
+        <p style="font-family: 'Lato', sans-serif font-weight:600;">We truly appreciate your trust in<br><span style="font-weight: 800;font-family: 'Lato', sans-serif font-size:0.8rem;"> HOME DEN INTERIORS.</span></p>
     </div>
 
 
     <div class="payment-section d-flex justify-content-between flex-wrap">
-        <!-- <div class="qr-sign" style="text-align: left; flex: 2; min-width: 250px;">
+        <div class="qr-sign" style="text-align: left; flex: 2; min-width: 250px;">
             <div class="qr-code" style="display: inline-block;">
-                <img src="https://ik.imagekit.io/zygvxqqhx/ELITEQR.png?updatedAt=1753508775928" alt="UPI QR Code">
+                <img src="{{ asset('images/QR.png') }}" alt="UPI QR Code">
             </div>
-        </div> -->
+
+            <div style="display: block; width:150px;">
+                <p style="text-align: center; color: #000000ff; line-height: 1.2;">Scan to View</p>
+            </div>
+
+        </div> 
         <div class="signature" style="margin-top: 20px; text-align: right; flex: 1; min-width: 200px;">
-        <p style="font-family: 'Playfair Display', serif; font-weight:700;">For: <strong style="font-family: 'Playfair Display', serif;">HOME DEN INTERIORS</strong></p>
+        <p style="font-family: 'Lato', sans-serif font-weight:700;">For: <strong style="font-family: 'Lato', sans-serif">HOME DEN INTERIORS</strong></p>
             <img src="{{ asset('images/xxx.png') }}" alt="E-signature" style="height:60px;">
-            <p style="font-family: 'Playfair Display', serif;">Authorized Signatory</p>
+            <p style="font-family: 'Lato', sans-serif">Authorized Signatory</p>
         </div>
     </div>
 

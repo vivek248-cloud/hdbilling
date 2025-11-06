@@ -54,8 +54,10 @@
             <tr>
                 <th>#</th>
                 <th>Date</th>
+                <th>Floor Type</th>
+                <th>Room Type</th>
+                <th>Entity</th>
                 <th>Description</th>
-                <th>Spec</th>
                 <th>Length</th>
                 <th>Width</th>
                 <th>Area</th>
@@ -69,8 +71,10 @@
                 <tr>
                     <td>{{ $index + 1 }}</td>
                     <td>{{ \Carbon\Carbon::parse($expense->date)->format('d-m-Y') }}</td>
-                    <td>{{ $expense->description }}</td>
+                    <td>{{ $expense->floorType->name ?? '-' }}</td>
+                    <td>{{ $expense->roomType->name ?? '-' }}</td>
                     <td>{{ $expense->spec ?? '-' }}</td>
+                    <td>{{ $expense->description }}</td>
                     <td>{{ $expense->length }}</td>
                     <td>{{ $expense->width }}</td>
                     <td>{{ number_format($expense->area, 2) }}</td>
@@ -80,14 +84,14 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="10" class="text-center text-muted">No expenses found.</td>
+                    <td colspan="12" class="text-center text-muted">No expenses found.</td>
                 </tr>
             @endforelse
         </tbody>
         @if($expenses->count() > 0)
         <tfoot>
             <tr class="table-secondary fw-bold">
-                <td colspan="9" class="text-end">Total</td>
+                <td colspan="11" class="text-end">Total</td>
                 <td>₹{{ number_format($totalExpense, 2) }}</td>
             </tr>
         </tfoot>
@@ -197,11 +201,11 @@
                                             // ✅ Non-expiring invoice link
                                             $permanentLink = route('payments.invoice', $payment->id);
 
-                                            $message = "*Invoice Details* 🧾\n"
+                                            $message = "*Invoice Details*\n"
                                                 . "Project: *{$project->name}*\n"
                                                 . "Amount: *₹" . number_format($payment->amount, 2) . "*\n"
                                                 . "Date: " . \Carbon\Carbon::parse($payment->date ?? $payment->created_at)->format('d M Y') . "\n\n"
-                                                . "Click below to view your invoice 👇\n"
+                                                . "Click below to view your invoice \n"
                                                 . "<" . $permanentLink . ">\n\n"
                                                 . "_This link will not expire._";
                                         @endphp
