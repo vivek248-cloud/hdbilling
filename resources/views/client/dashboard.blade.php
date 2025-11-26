@@ -3,7 +3,7 @@
 @section('content')
 <div class="container my-4">
     {{-- 🏠 Welcome Header --}}
-    <h2 class="mb-4 text-center">Welcome, {{ Auth::user()->name }}</h2>
+    <h2 class="mb-4 text-center">Welcome, {{ Auth::user()->name }} </h2>
 
 
     
@@ -90,8 +90,6 @@
 
 
 <div class="container">
-
-    <h4 class="mb-4">Welcome, {{ $user->name }} 👋</h4>
 
     {{-- 🔍 Expense Filter Section --}}
 <form method="GET" class="row g-2 mb-3">

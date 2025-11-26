@@ -21,7 +21,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background: #0a0a0a;
+            background: linear-gradient(-45deg, #0f0f0f, #1a1a2e, #04070fff, #020b16ff);
         }
 
         .login-container {

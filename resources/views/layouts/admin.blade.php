@@ -108,7 +108,7 @@
 
         /* Page layout */
         main { flex: 1; padding-top: 80px; }
-        .container {
+        .container .container{
             background: var(--surface-light);
             border-radius: 12px;
             padding: 1.5rem;
@@ -147,9 +147,44 @@
         }
         body.dark-mode .offcanvas { background: #000; }
 
+
+        #productTable th, 
+        #productTable td {
+            vertical-align: middle;
+            text-align: center;
+            white-space: nowrap;
+            padding: 6px 8px;
+            font-size: 14px;
+        }
+
+        #productTable input, 
+        #productTable select {
+            width: 100%;
+            font-size: 13px;
+            padding: 4px 6px;
+        }
+
+        .table-responsive {
+            border-radius: 6px;
+            border: 1px solid #ddd;
+            background: #fff;
+            overflow-x: auto;
+            overflow-y: hidden;
+        }
+
+        .table-secondary th {
+            text-align: center;
+            background-color: #f8f9fa;
+            color: #333;
+            font-weight: 600;
+        }
+
+
         @media (max-width: 576px) {
             .offcanvas { width: 100% !important; }
         }
+
+
     </style>
 </head>
 <body>
@@ -203,6 +238,12 @@
                             <a class="nav-link {{ request()->is('admin/payments*') ? 'active' : '' }}"
                                href="{{ route('payments.index') }}">
                                 <i class="bi bi-cash-stack me-2"></i> Payments
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->is('customers*') ? 'active' : '' }}"
+                            href="{{ route('customers.index') }}">
+                            <i class="bi bi-people"></i> Quotations
                             </a>
                         </li>
                     @else
@@ -286,6 +327,15 @@
                             <i class="bi bi-cash-stack"></i> Payments
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->is('customers*') ? 'active' : '' }}"
+                            href="{{ route('customers.index') }}">
+                        <i class="bi bi-people"></i> Quotations
+                        </a>
+                    </li>
+
+
+                    
                 @else
                     <li class="nav-item">
                         <a class="nav-link {{ request()->is('client/dashboard') ? 'active' : '' }}"

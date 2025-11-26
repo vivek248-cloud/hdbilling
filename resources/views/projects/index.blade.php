@@ -3,6 +3,7 @@
 @section('title', 'Projects')
 
 @section('content')
+<div class="container mb-4">
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h2><i class="bi bi-box-fill"></i> Projects</h2>
     <a href="{{ route('projects.create') }}" class="btn btn-primary">  <i class="bi bi-plus-circle me-1"></i>Add Project</a>
@@ -48,5 +49,6 @@
         @endforelse
     </tbody>
 </table>
+</div>
 </div>
 @endsection
